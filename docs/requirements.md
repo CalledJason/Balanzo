@@ -56,3 +56,57 @@ Each transaction contains:
 - User
 - Category
 - Transaction
+
+## 7. Database Entities
+
+### Users
+
+Stores user account information.
+
+Attributes: 
+
+- id
+- name
+- email
+- password
+- created_at
+- update_at
+
+### Categories
+
+Stores transaction categories.
+
+Attributes:
+
+- id
+- name
+- type
+- created_at
+- update_at
+
+Category types:
+
+- income
+- expense
+
+### Transactions
+
+Stores financial transactions.
+
+Attributes:
+
+- id
+- user_id
+- category_id
+- amount
+- description
+- transaction_date
+- created_at
+- updated_at
+
+## 8. Relationships
+
+- One user can have many transactions.
+- One category can be associated with many transactions.
+- Each transaction belongs to one user.
+- Each transaction belongs to one category.
