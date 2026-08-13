@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from backend.database import get_db
 from backend.routers.transactions import router as transaction_router
 from backend.routers.categories import router as category_router
+from backend.routers.users import router as user_router
 
 
 app = FastAPI(
@@ -17,6 +18,8 @@ app = FastAPI(
 app.include_router(transaction_router)
 
 app.include_router(category_router)
+
+app.include_router(user_router)
 
 @app.get("/")
 def root():
