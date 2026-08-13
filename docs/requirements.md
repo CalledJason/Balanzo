@@ -1,8 +1,8 @@
-# Spendwise Requirements
+# Balanzo Requirements
 
 ## 1. Project Overview
 
-SpendWise is a personal finance analytics platform designed to help users track, analyze, and understand their spending behavior.
+Balanzo is a personal finance analytics platform designed to help users track, analyze, and understand their spending behavior.
 
 ## 2. Target User
 

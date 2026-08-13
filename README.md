@@ -1,6 +1,6 @@
-# SpendWise
+# Balanzo
 
-SpendWise is a personal finance analytics platform for tracking,
+Balanzo is a personal finance analytics platform for tracking,
 analyzing, and understanding personal spending behavior.
 
 ## Tech Stack
