@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from backend.database import get_db
+from backend.models.user import User
+from backend.dependencies.auth import get_current_user
 from backend.schemas.transaction import (
     TransactionCreate,
     TransactionUpdate,
@@ -29,12 +31,11 @@ router = APIRouter(
 def create_transaction_endpoint(
     transaction_data: TransactionCreate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    user_id = 1
-
     transaction = create_transaction(
         db = db,
-        user_id = user_id,
+        user_id = current_user.id,
         category_id = transaction_data.category_id,
         amount = transaction_data.amount,
         description = transaction_data.description,
@@ -51,12 +52,11 @@ def create_transaction_endpoint(
 )
 def get_transactions_endpoint(
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    user_id = 1
-
     return get_transaction(
         db = db,
-        user_id = user_id,
+        user_id = current_user.id,
     )
 
 
@@ -68,12 +68,11 @@ def get_transactions_endpoint(
 def get_transaction_by_id_endpoint(
     transaction_id: int,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    user_id = 1
-
     transaction = get_transaction_by_id(
         db = db,
-        user_id = user_id,
+        user_id = current_user.id,
         transaction_id = transaction_id,
     )
 
@@ -96,12 +95,13 @@ def update_transaction_endpoint(
     transaction_id: int,
     transaction_data: TransactionUpdate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     user_id = 1
 
     transaction = update_transaction(
         db = db,
-        user_id = user_id,
+        user_id = current_user.id,
         transaction_id = transaction_id,
         category_id = transaction_data.category_id,
         amount = transaction_data.amount,
@@ -120,18 +120,17 @@ def update_transaction_endpoint(
 
 
 @router.delete(
-    "/{transaction}",
+    "/{transaction_id}",
     status_code = status.HTTP_204_NO_CONTENT,
 )
 def delete_transaction_endpoint(
     transaction_id: int,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    user_id = 1
-
     deleted = delete_transaction(
         db = db,
-        user_id = user_id,
+        user_id = current_user.id,
         transaction_id = transaction_id,
     )
 
