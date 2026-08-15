@@ -8,6 +8,7 @@ from backend.routers.transactions import router as transaction_router
 from backend.routers.categories import router as category_router
 from backend.routers.users import router as user_router
 from backend.routers.auth import router as auth_router
+from backend.routers.summary import router as summary_router
 
 
 app = FastAPI(
@@ -24,6 +25,8 @@ app.include_router(category_router)
 app.include_router(user_router)
 
 app.include_router(auth_router)
+
+app.include_router(summary_router)
 
 @app.get("/")
 def root():
