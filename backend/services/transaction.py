@@ -33,10 +33,34 @@ def create_transaction(
 def get_transaction(
     db: Session,
     user_id: int,
+    start_date: date | None = None,
+    end_date: date | None = None,
+    category_id: int | None = None,
 ) -> list[Transaction]:
-    return (
+
+    query = (
         db.query(Transaction)
         .filter(Transaction.user_id == user_id)
+    )
+
+    if start_date is not None:
+        query = query.filter(
+            Transaction.transaction_date >= start_date
+        )
+
+    if end_date is not None:
+        query = query.filter(
+            Transaction.transaction_date <= end_date
+        )
+
+    if category_id is not None:
+        query = query.filter(
+            Transaction.category_id == category_id
+        )
+
+
+    return (
+        query
         .order_by(Transaction.transaction_date.desc())
         .all()
     )

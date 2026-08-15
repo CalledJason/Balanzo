@@ -1,3 +1,4 @@
+from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -53,10 +54,23 @@ def create_transaction_endpoint(
 def get_transactions_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
+    start_date: date | None = None,
+    end_date: date | None = None,
+    category_id: int | None = None,
 ):
+    if start_date is not None and end_date is not None:
+        if start_date > end_date:
+            raise HTTPException(
+                status_code = status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail = "start_date must be before or equal to end_date",
+            )
+
     return get_transaction(
         db = db,
         user_id = current_user.id,
+        start_date = start_date,
+        end_date = end_date,
+        category_id = category_id,
     )
 
 
@@ -97,8 +111,6 @@ def update_transaction_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    user_id = 1
-
     transaction = update_transaction(
         db = db,
         user_id = current_user.id,
