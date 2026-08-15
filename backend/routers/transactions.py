@@ -9,6 +9,7 @@ from backend.schemas.transaction import (
     TransactionCreate,
     TransactionUpdate,
     TransactionResponse,
+    TransactionPaginatedResponse,
 )
 
 from backend.services.transaction import (
@@ -49,7 +50,7 @@ def create_transaction_endpoint(
 
 @router.get(
     "/",
-    response_model = list[TransactionResponse],
+    response_model = TransactionPaginatedResponse,
 )
 def get_transactions_endpoint(
     db: Session = Depends(get_db),
@@ -57,6 +58,8 @@ def get_transactions_endpoint(
     start_date: date | None = None,
     end_date: date | None = None,
     category_id: int | None = None,
+    page: int = 1,
+    limit: int = 10,
 ):
     if start_date is not None and end_date is not None:
         if start_date > end_date:
@@ -65,12 +68,34 @@ def get_transactions_endpoint(
                 detail = "start_date must be before or equal to end_date",
             )
 
+
+
+    if page < 1:
+        raise HTTPException(
+            status_code = status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail = "page must be greater than or equal to 1",
+        )
+
+
+
+
+    if limit < 1 or limit > 100:
+        raise HTTPException(
+            status_code = status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail = "limit must be between 1 and 100",
+        )
+
+
+
+
     return get_transaction(
         db = db,
         user_id = current_user.id,
         start_date = start_date,
         end_date = end_date,
         category_id = category_id,
+        page = page,
+        limit = limit,
     )
 
 

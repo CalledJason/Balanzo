@@ -1,5 +1,6 @@
 from datetime import date
 from decimal import Decimal
+from math import ceil
 
 from sqlalchemy.orm import Session
 
@@ -33,10 +34,12 @@ def create_transaction(
 def get_transaction(
     db: Session,
     user_id: int,
+    page: int,
+    limit: int,
     start_date: date | None = None,
     end_date: date | None = None,
     category_id: int | None = None,
-) -> list[Transaction]:
+) -> dict:
 
     query = (
         db.query(Transaction)
@@ -58,12 +61,28 @@ def get_transaction(
             Transaction.category_id == category_id
         )
 
+    total = query.count()
 
-    return (
+    total_pages = ceil(total / limit) if total > 0 else 0
+
+    offset = (page - 1) * limit
+
+    transactions = (
         query
         .order_by(Transaction.transaction_date.desc())
+        .offset(offset)
+        .limit(limit)
         .all()
     )
+
+
+    return {
+        "items": transactions,
+        "page": page,
+        "limit": limit,
+        "total": total,
+        "total_pages": total_pages,
+    }
 
 
 

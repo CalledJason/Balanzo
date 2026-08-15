@@ -28,3 +28,12 @@ class TransactionResponse(BaseModel):
     transaction_date: date
 
     model_config = ConfigDict(from_attributes = True)
+
+
+
+class TransactionPaginatedResponse(BaseModel):
+    items: list[TransactionResponse]
+    page: int
+    limit: int
+    total: int
+    total_pages: int
