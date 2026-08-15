@@ -61,6 +61,7 @@ def get_transactions_endpoint(
     page: int = 1,
     limit: int = 10,
     transaction_type: str | None = None,
+    search: str | None = None,
 ):
     if start_date is not None and end_date is not None:
         if start_date > end_date:
@@ -107,6 +108,7 @@ def get_transactions_endpoint(
         page = page,
         limit = limit,
         transaction_type = transaction_type,
+        search = search,
     )
 
 

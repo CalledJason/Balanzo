@@ -41,6 +41,7 @@ def get_transaction(
     end_date: date | None = None,
     category_id: int | None = None,
     transaction_type: str | None = None,
+    search: str | None = None,
 ) -> dict:
 
     query = (
@@ -67,6 +68,11 @@ def get_transaction(
     if transaction_type is not None:
         query = query.filter(
             Category.type == transaction_type
+        )
+
+    if search is not None:
+        query = query.filter(
+            Transaction.description.ilike(f"%{search}%")
         )
 
 
