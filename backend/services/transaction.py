@@ -42,6 +42,8 @@ def get_transaction(
     category_id: int | None = None,
     transaction_type: str | None = None,
     search: str | None = None,
+    sort_by: str = "transaction_date",
+    sort_order: str = "desc",
 ) -> dict:
 
     query = (
@@ -75,6 +77,16 @@ def get_transaction(
             Transaction.description.ilike(f"%{search}%")
         )
 
+    if sort_by == "amount":
+        sort_column = Transaction.amount
+    else:
+        sort_column = Transaction.transaction_date
+
+    if sort_order == "asc":
+        query = query.order_by(sort_column.asc())
+    else:
+        query = query.order_by(sort_column.desc())
+
 
 
     total = query.count()
@@ -85,7 +97,6 @@ def get_transaction(
 
     transactions = (
         query
-        .order_by(Transaction.transaction_date.desc())
         .offset(offset)
         .limit(limit)
         .all()

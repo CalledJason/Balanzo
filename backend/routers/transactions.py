@@ -62,6 +62,8 @@ def get_transactions_endpoint(
     limit: int = 10,
     transaction_type: str | None = None,
     search: str | None = None,
+    sort_by: str = "transaction_date",
+    sort_order: str = "desc",
 ):
     if start_date is not None and end_date is not None:
         if start_date > end_date:
@@ -97,6 +99,18 @@ def get_transactions_endpoint(
             )
 
 
+    if sort_by not in {"transaction_date", "amount"}:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="sort_by must be transaction_date or amount",
+        )
+
+
+    if sort_order not in {"asc", "desc"}:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="sort_order must be asc or desc",
+        )
 
 
     return get_transaction(
@@ -109,6 +123,8 @@ def get_transactions_endpoint(
         limit = limit,
         transaction_type = transaction_type,
         search = search,
+        sort_by = sort_by,
+        sort_order = sort_order,
     )
 
 
@@ -120,7 +136,7 @@ def get_transactions_endpoint(
 def get_transaction_by_id_endpoint(
     transaction_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     transaction = get_transaction_by_id(
         db = db,
