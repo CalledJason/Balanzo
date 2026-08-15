@@ -60,6 +60,7 @@ def get_transactions_endpoint(
     category_id: int | None = None,
     page: int = 1,
     limit: int = 10,
+    transaction_type: str | None = None,
 ):
     if start_date is not None and end_date is not None:
         if start_date > end_date:
@@ -87,6 +88,15 @@ def get_transactions_endpoint(
 
 
 
+    if transaction_type is not None:
+        if transaction_type not in {"income", "expense"}:
+            raise HTTPException(
+                status_code = status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail = "transaction_type must be either income or expense",
+            )
+
+
+
 
     return get_transaction(
         db = db,
@@ -96,6 +106,7 @@ def get_transactions_endpoint(
         category_id = category_id,
         page = page,
         limit = limit,
+        transaction_type = transaction_type,
     )
 
 

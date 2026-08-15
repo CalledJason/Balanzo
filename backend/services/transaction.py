@@ -5,6 +5,7 @@ from math import ceil
 from sqlalchemy.orm import Session
 
 from backend.models.transaction import Transaction
+from backend.models.category import Category
 
 
 def create_transaction(
@@ -39,10 +40,12 @@ def get_transaction(
     start_date: date | None = None,
     end_date: date | None = None,
     category_id: int | None = None,
+    transaction_type: str | None = None,
 ) -> dict:
 
     query = (
         db.query(Transaction)
+        .join(Category, Category.id == Transaction.category_id)
         .filter(Transaction.user_id == user_id)
     )
 
@@ -60,6 +63,13 @@ def get_transaction(
         query = query.filter(
             Transaction.category_id == category_id
         )
+
+    if transaction_type is not None:
+        query = query.filter(
+            Category.type == transaction_type
+        )
+
+
 
     total = query.count()
 
