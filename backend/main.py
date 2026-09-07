@@ -10,6 +10,7 @@ from backend.routers.users import router as user_router
 from backend.routers.auth import router as auth_router
 from backend.routers.summary import router as summary_router
 from backend.routers.summary_category import router as summary_category_router
+from backend.routers.analytics import router as analytics_router
 
 
 app = FastAPI(
@@ -30,6 +31,8 @@ app.include_router(auth_router)
 app.include_router(summary_router)
 
 app.include_router(summary_category_router)
+
+app.include_router(analytics_router)
 
 @app.get("/")
 def root():
