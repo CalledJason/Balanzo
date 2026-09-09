@@ -146,7 +146,7 @@ def get_monthly_trend(
                 "month",
                 Transaction.transaction_date,
             ).label("month"),
-            Category.type,
+            Category.type.label("transaction_type"),
             func.sum(Transaction.amount).label("total_amount"),
         )
         .join(
@@ -186,7 +186,7 @@ def get_monthly_trend(
     for row in results:
         year = int(row.year)
         month = int(row.month)
-        transaction_type = row.type
+        transaction_type = row.transaction_type
         total_amount = Decimal(row.total_amount)
 
         key = (year, month)
@@ -214,5 +214,57 @@ def get_monthly_trend(
             }
             for data in monthly_data.values()
         ]
+
+
+
+def get_top_spending_categories(
+    db: Session,
+    user_id: int,
+    year: int,
+    month: int,
+    limit: int,
+) -> list[dict]:
+    
+    results = (
+        db.query(
+            Category.id.label("category_id"),
+            Category.name.label("category_name"),
+            func.sum(Transaction.amount).label("total_amount"),
+        )
+        .join(
+            Transaction,
+            Transaction.category_id == category_id,
+        )
+        .filter(
+            Transaction.user_id == user_id,
+            Category.type == "expense",
+            func.extract(
+                "year",
+                Transaction.transaction_date,
+            ) == year,
+            func.extract(
+                "month",
+                Transaction.transaction_date,
+            ) == month,
+        )
+        .group_by(
+            Category.id,
+            Category.name,
+        )
+        .order_by(
+            func.sum(Transaction.amount).desc()
+        )
+        .limit(limit)
+        .all()
+    )
+
+    return [
+        {
+            "category_id": row.category_id,
+            "category_name": row.category_name,
+            "total_amount": row.total_amount,
+        }
+        for row in results
+    ]
                 
             

@@ -37,3 +37,15 @@ class MonthlyTrendItem(BaseModel):
 
 class MonthlyTrendResponse(BaseModel):
     items: list[MonthlyTrendItem]
+
+
+class TopSpendingCategoryItem(BaseModel):
+    category_id: int
+    category_name: str
+    total_amount: Decimal
+
+
+class TopSpendingCategoryResponse(BaseModel):
+    year: int
+    month: int = Field(ge=1, le= 12)
+    items: list[TopSpendingCategoryItem]
