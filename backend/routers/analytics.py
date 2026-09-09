@@ -9,12 +9,16 @@ from backend.schemas.analytics import (
     MonthlySummaryResponse,
     CategoryBreakdownResponse,
     MonthlyTrendResponse,
+    TopSpendingCategoryResponse,
+    IncomeExpenseRatioResponse,
 )
 
 from backend.services.analytics import (
     get_monthly_summary,
     get_category_breakdown,
     get_monthly_trend,
+    get_top_spending_categories,
+    get_income_expense_ratio,
 )
 
 
@@ -101,3 +105,28 @@ def get_monthly_trend_endpoint(
     return {
         "items": items,
     }
+
+
+
+@router.get(
+    "/ratio",
+    response_model = IncomeExpenseRatioResponse,
+)
+def get_income_expense_ratio_endpoint(
+    year: int,
+    month: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if month < 1 or month > 12:
+        raise HTTPException(
+            status_code = status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail = "month must be betweeen 1 and 12",
+        )
+
+    return get_income_expense_ratio(
+        db = db,
+        user_id = current_user.id,
+        year = year,
+        month = month,
+    )

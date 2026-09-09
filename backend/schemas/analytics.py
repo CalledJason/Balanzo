@@ -49,3 +49,11 @@ class TopSpendingCategoryResponse(BaseModel):
     year: int
     month: int = Field(ge=1, le= 12)
     items: list[TopSpendingCategoryItem]
+
+
+class IncomeExpenseRatioResponse(BaseModel):
+    year: int
+    month: int = Field(ge=1, le=12)
+    total_income: Decimal
+    total_expense: Decimal
+    expense_ratio: Decimal
