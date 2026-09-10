@@ -347,3 +347,148 @@ def get_income_expense_ratio(
         "total_expense": expense,
         "expense_ratio": expense_ratio,
     }
+
+
+def get_savings_rate(
+    db: Session,
+    user_id: int,
+    year: int,
+    month: int,
+) -> dict[str, Decimal | int]:
+
+    income = (
+        db.query(
+            func.coalesce(
+                func.sum(Transaction.amount),
+                0,
+            )
+        )
+        .join(
+            Category,
+            Category.id == Transaction.category_id,
+        )
+        .filter(
+            Transaction.user_id == user_id,
+            Category.type == "income",
+            func.extract(
+                "year",
+                Transaction.transaction_date,
+            ) == year,
+            func.extract(
+                "month",
+                Transaction.transaction_date,
+            ) == month,
+        )
+        .scalar()
+    )  
+
+    expense = (
+        db.query(
+            func.coalesce(
+                func.sum(Transaction.amount),
+                0,
+            )
+        )
+        .join(
+            Category,
+            Category.id == Transaction.category_id,
+        )
+        .filter(
+            Transaction.user_id == user_id,
+            Category.type == "expense",
+            func.extract(
+                "year",
+                Transaction.transaction_date,
+            ) == year,
+            func.extract(
+                "month",
+                Transaction.transaction_date,
+            ) == month,
+        )
+        .scalar()
+    )
+
+    income = Decimal(income)
+    expense = Decimal(expense)
+    balance = income - expense
+
+    if income == 0:
+        savings_rate = Decimal("0")
+    else: 
+        savings_rate = (balance / income) * Decimal("100")
+
+    return {
+        "year": year,
+        "month": month,
+        "total_income": income,
+        "total_expense": expense,
+        "balance": balance,
+        "savings_rate": savings_rate,
+    }
+
+
+def get_daily_trend(
+    db: Session,
+    user_id: int,
+    year: int,
+    month: int,
+) -> list[dict]:
+
+    results = (
+        db.query(
+            Transaction.transaction_date.label("transaction_date"),
+            Category.type.label("transaction_type"),
+            func.sum(Transaction.amount).label("total_amount"),
+        )
+        .join(
+            Category,
+            Category.id == Transaction.category_id,
+        )
+        .filter(
+            Transaction.user_id == user_id,
+            func.extract(
+                "year",
+                Transaction.transaction_date,
+            ) == year,
+            func.extract(
+                "month",
+                Transaction.transaction_date,
+            ) == month,
+        )
+        .group_by(
+            Transaction.transaction_date,
+            Category.type,
+        )
+        .order_by(
+            Transaction.transaction_date,
+        )
+        .all()
+    )
+
+    daily_data = {}
+
+    for row in results:
+        transaction_date = row.transaction_date
+        transaction_type = row.transaction_type
+        total_amount = Decimal(row.total_amount)
+
+        if transaction_date not in daily_data:
+            daily_data[transaction_date] = {
+                "date": transaction_date,
+                "total_income": Decimal("0"),
+                "total_expense": Decimal("0"),
+            }
+
+        if transaction_type == "income":
+            daily_data[transaction_date]["total_income"] = total_amount
+
+        elif transaction_type == "expense":
+            daily_data[transaction_date]["total_expense"] = total_amount
+
+    return [
+        {
+            **data,
+            "balance": data["total_income"] - data["total_expense"],
+        }
+        for data in daily_data.values()
+    ]

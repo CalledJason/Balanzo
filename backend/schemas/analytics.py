@@ -2,6 +2,8 @@ from decimal import Decimal
 
 from pydantic import BaseModel, Field
 
+from datetime import date
+
 
 class MonthlySummaryResponse(BaseModel):
     year: int
@@ -57,3 +59,27 @@ class IncomeExpenseRatioResponse(BaseModel):
     total_income: Decimal
     total_expense: Decimal
     expense_ratio: Decimal
+
+
+class SavingsRateResponse(BaseModel):
+    year: int
+    month: int = Field(ge=1, le=12)
+    total_income: Decimal
+    total_expense: Decimal
+    balance: Decimal
+    savings_rate: Decimal
+
+
+class DailyTrendItem(BaseModel):
+    date: date
+    total_income: Decimal
+    total_expense: Decimal
+    balance: Decimal
+
+
+class DailyTrendResponse(BaseModel):
+    year: int
+    month: int = Field(ge=1, le=12)
+    items: list[DailyTrendItem]
+
+

@@ -11,6 +11,8 @@ from backend.schemas.analytics import (
     MonthlyTrendResponse,
     TopSpendingCategoryResponse,
     IncomeExpenseRatioResponse,
+    SavingsRateResponse,
+    DailyTrendResponse
 )
 
 from backend.services.analytics import (
@@ -19,6 +21,8 @@ from backend.services.analytics import (
     get_monthly_trend,
     get_top_spending_categories,
     get_income_expense_ratio,
+    get_savings_rate,
+    get_daily_trend,
 )
 
 
@@ -130,3 +134,61 @@ def get_income_expense_ratio_endpoint(
         year = year,
         month = month,
     )
+
+
+
+@router.get(
+    "/savings-rate",
+    response_model=SavingsRateResponse,
+)
+def get_savings_rate_endpoint(
+    year: int,
+    month: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if month < 1 or month > 12:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="month must be between 1 and 12",
+        )
+
+    return get_savings_rate(
+        db=db,
+        user_id=current_user.id,
+        year=year,
+        month=month,
+    )
+
+
+    
+
+
+@router.get(
+    "/daily",
+    response_model=DailyTrendResponse,
+)
+def get_daily_trend_endpoint(
+    year: int,
+    month: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if month < 1 or month > 12:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="month must be between 1 and 12",
+        )
+
+    items = get_daily_trend(
+        db=db,
+        user_id=current_user.id,
+        year=year,
+        month=month,
+    )
+
+    return {
+        "year": year,
+        "month": month,
+        "items": items,
+    }
