@@ -492,3 +492,72 @@ def get_daily_trend(
         }
         for data in daily_data.values()
     ]
+
+
+def get_weekly_trend(
+    db: Session,
+    user_id: int,
+    year: int,
+    month: int,
+) -> list[dict]:
+
+    results = (
+        db.query(
+            Transaction.transaction_date.label("transaction_date"),
+            Category.type.label("transaction_type"),
+            func.sum(Transaction.amount).label("total_amount"),
+        )
+        .join(
+            Category,
+            Category.id == Transaction.category_id,
+        )
+        .filter(
+            Transaction.user_id == user_id,
+            func.extract(
+                "year",
+                Transaction.transaction_date,
+            ) == year,
+            func.extract(
+                "month",
+                Transaction.transaction_date,
+            ) == month,
+        )
+        .group_by(
+            Transaction.transaction_date,
+            Category.type,
+        )
+        .order_by(
+            Transaction.transaction_date,
+        )
+        .all()
+    )
+
+    weekly_data = {}
+
+    for row in results:
+        transaction_date = row.transaction_date
+        transaction_type = row.transaction_type
+        total_amount = Decimal(row.total_amount)
+
+        week = ((transaction_date.day - 1) // 7) + 1
+
+        if week not in weekly_data:
+            weekly_data[week] = {
+                "week": week,
+                "total_income": Decimal("0"),
+                "total_expense": Decimal("0"),
+            }
+
+        if transaction_type == "income":
+            weekly_data[week]["total_income"] = total_amount
+
+        elif transaction_type == "expense":
+            weekly_data[week]["total_expense"] = total_amount
+
+    return [
+        {
+            **data,
+            "balance": data["total_income"] - data["total_expense"],
+        }
+        for data in weekly_data.values()
+    ]

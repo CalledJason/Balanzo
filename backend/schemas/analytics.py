@@ -83,3 +83,14 @@ class DailyTrendResponse(BaseModel):
     items: list[DailyTrendItem]
 
 
+class WeeklyTrendItem(BaseModel):
+    week: int
+    total_income: Decimal
+    total_expense: Decimal
+    balance: Decimal
+
+
+class WeeklyTrendResponse(BaseModel):
+    year: int
+    month: int = Field(ge=1, le=12)
+    items: list[WeeklyTrendItem]

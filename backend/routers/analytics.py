@@ -12,7 +12,8 @@ from backend.schemas.analytics import (
     TopSpendingCategoryResponse,
     IncomeExpenseRatioResponse,
     SavingsRateResponse,
-    DailyTrendResponse
+    DailyTrendResponse,
+    WeeklyTrendResponse,
 )
 
 from backend.services.analytics import (
@@ -23,6 +24,7 @@ from backend.services.analytics import (
     get_income_expense_ratio,
     get_savings_rate,
     get_daily_trend,
+    get_weekly_trend,
 )
 
 
@@ -181,6 +183,37 @@ def get_daily_trend_endpoint(
         )
 
     items = get_daily_trend(
+        db=db,
+        user_id=current_user.id,
+        year=year,
+        month=month,
+    )
+
+    return {
+        "year": year,
+        "month": month,
+        "items": items,
+    }
+
+
+
+@router.get(
+    "/weekly",
+    response_model = WeeklyTrendResponse,
+)
+def get_weekly_trend_endpoint(
+    year: int,
+    month: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if month < 1 or month > 12:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="month must be between 1 and 12",
+        )
+
+    items = get_weekly_trend(
         db=db,
         user_id=current_user.id,
         year=year,
